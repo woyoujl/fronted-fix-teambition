@@ -1,0 +1,61 @@
+interface:
+  display_name: "Teambition 前端缺陷修复"
+  short_description: "查询、验证并修复 Teambition 前端 bug；当前分支提交（默认不开 MR）与 TB 回填"
+  default_prompt: >-
+    Use $teambition-defect-fix-frontend. First invoke $teambition-query-defects
+    and continue only with a confirmed Bug/defect. Confirm the current branch,
+    run evidence triage (Fix/Suggest/Wait), read linked DingTalk/product/design/API
+    docs, make the smallest safe frontend change only when Fix is justified, run
+    focused tests and browser verification (prompt the user for local test
+    account/password/start commands when login is required; never persist
+    passwords to git/TB), UI replay + before/after screenshots, then commit on
+    the current branch after verify (do not create a GitLab MR unless the user
+    explicitly asks; never auto-merge). If verification fails, automatically
+    restore that task to its pre-fix state. After batch verification keep passed
+    commits and roll back only failed ones. Write cause/changes/verification/risk/SHA
+    (and MR URL only if requested) back to Teambition with @fixer via
+    mentionUserIds. Do not hard-fix when evidence is insufficient. Read GitLab
+    credentials only from GITLAB_TOKEN or GL_TOKEN environment variables.
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "teambition-user"
+      description: "Teambition User MCP for personal task and defect queries"
+      transport: "stdio"
+    - type: "mcp"
+      value: "teambition-app"
+      description: "Teambition App MCP for team-managed project and defect queries"
+      transport: "stdio"
+    - type: "mcp"
+      value: "teambition-docs"
+      description: "Teambition OpenAPI documentation lookup only"
+      transport: "streamable-http"
+    - type: "mcp"
+      value: "dingtalk-docs"
+      description: "DingTalk document lookup for prototypes/PRDs; use browser fallback if missing"
+    - type: "mcp"
+      value: "yapi_auto_mcp"
+      description: "YApi contract lookup; read-only unless explicitly requested"
+    - type: "mcp"
+      value: "lanhu"
+      description: "Lanhu design lookup when a design URL is available"
+    - type: "mcp"
+      value: "Framelink MCP for Figma"
+      description: "Figma design lookup when a node or frame link is available"
+    - type: "mcp"
+      value: "cursor-ide-browser"
+      description: "Browser replay, snapshot, screenshot, and verification in Cursor"
+    - type: "mcp"
+      value: "chrome-devtools"
+      description: "Browser verification fallback outside Cursor"
+    - type: "cli"
+      value: "git"
+      description: "Current-branch commit and optional push after verify"
+    - type: "cli"
+      value: "glab"
+      description: "Optional GitLab MR creation only when user asks; never auto-merge"
+    - type: "api"
+      value: "GitLab REST API"
+      description: "Optional push/MR helpers; token from secure env only"
+policy:
+  allow_implicit_invocation: true
